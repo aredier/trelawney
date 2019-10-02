@@ -1,5 +1,6 @@
 import abc
-from typing import List, Optional
+import operator
+from typing import List, Optional, Dict
 
 import sklearn
 import pandas as pd
@@ -15,21 +16,37 @@ class BaseExplainer(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None):
+    def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> Dict[str, float]:
         pass
 
-    def filtered_feature_importance(self, x_explain: pd.DataFrame, cols: List[str], n_cols: Optional[int] = None):
-        pass
+    @staticmethod
+    def _filter_and_limit_dict(col_importance_dic: Dict[str, float], cols: List[str], n_cols: int):
+        return dict(sorted(
+            filter(
+                lambda col_and_importance: col_and_importance[0] in cols,
+                col_importance_dic.items()
+            ),
+            key=operator.itemgetter(1),
+            reverse=True
+        )[:n_cols])
+
+    def filtered_feature_importance(self, x_explain: pd.DataFrame, cols: List[str],
+                                    n_cols: Optional[int] = None) -> Dict[str, float]:
+        return self._filter_and_limit_dict(self.feature_importance(x_explain), cols, n_cols)
 
     def graph_feature_importance(self, x_explain: pd.DataFrame, cols: List[str], n_cols: Optional[int] = None):
-        pass
+        raise NotImplementedError('graphing functionalities not implemented yet')
 
     @abc.abstractmethod
-    def explain_local(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None):
+    def explain_local(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> List[Dict[str, float]]:
         pass
 
-    def explain_filtered_local(self, x_explain: pd.DataFrame, cols: List[str], n_cols: Optional[int] = None):
-        pass
+    def explain_filtered_local(self, x_explain: pd.DataFrame, cols: List[str],
+                               n_cols: Optional[int] = None) -> List[Dict[str, float]]:
+        return [
+            self._filter_and_limit_dict(sample_importance_dict, cols, n_cols)
+            for sample_importance_dict in self.explain_local(x_explain)
+        ]
 
     def graph_local_explanation(self, x_explain: pd.DataFrame, cols: List[str], n_cols: Optional[int] = None):
-        pass
+        raise NotImplementedError('graphing functionalities not implemented yet')
