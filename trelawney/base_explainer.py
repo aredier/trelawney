@@ -79,7 +79,7 @@ class BaseExplainer(abc.ABC):
     def explain_filtered_local(self, x_explain: pd.DataFrame, cols: List[str],
                                n_cols: Optional[int] = None) -> List[Dict[str, float]]:
         """same as `explain_local` but applying a filter on each explanation on the features"""
-        
+
         return [
             self._filter_and_limit_dict(sample_importance_dict, cols, n_cols)
             for sample_importance_dict in self.explain_local(x_explain)
