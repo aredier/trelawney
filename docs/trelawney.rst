@@ -12,6 +12,14 @@ trelawney.base\_explainer module
     :undoc-members:
     :show-inheritance:
 
+trelawney.lime\_explainer module
+--------------------------------
+
+.. automodule:: trelawney.lime_explainer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 trelawney.trelawney module
 --------------------------
 
