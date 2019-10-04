@@ -12,7 +12,30 @@ class LimeExplainer(BaseExplainer):
     """
     Lime stands for local interpretable model-agnostic explanations and is a package based on
     `this article <https://www.arxiv.org/abs/1602.04938>`_. Lime will explain a single prediction of you model
-    by creating a local approximation of your model around said prediction.'sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+    by crechariotsating a local approximation of your model around said prediction.'sphinx.ext.autodoc', 'sphinx.ext.viewcode']
+
+    .. testsetup::
+
+        >>> import pandas as pd
+        >>> import numpy as np
+        >>> from trelawney.lime_explainer import LimeExplainer
+        >>> from sklearn.linear_model import LogisticRegression
+
+    .. doctest::
+
+        >>> X = pd.DataFrame([np.array(range(100)), np.random.normal(size=100).tolist()], index=['real', 'fake']).T
+        >>> y = np.array(range(100)) > 50
+        >>> # training the base model
+        >>> model = LogisticRegression().fit(X, y)
+        >>> # creating and fiting the explainer
+        >>> explainer = LimeExplainer()
+        >>> explainer.fit(model, X, y)
+        >>> # explaining observation
+        >>> explanation =  explainer.explain_local(pd.DataFrame([[5, 0.1]]))[0]
+        >>> abs(explanation['real']) > abs(explanation['fake'])
+        True
+
+
     """
 
     def __init__(self, class_names: Optional[List[str]] = None, categorical_features: Optional[List[str]] = None, ):
