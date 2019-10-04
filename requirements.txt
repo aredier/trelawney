@@ -1,5 +1,9 @@
+Keras==2.3.0
+tensorflow==1.14
+xgboost==0.90
 pandas==0.25.1
 scikit-learn==0.21.3
 tqdm==4.36.1
 lime==0.1.1.36
 plotly==4.1.1
+shap==0.30.2
