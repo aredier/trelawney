@@ -17,7 +17,7 @@ class LimeExplainer(BaseExplainer):
 
     def __init__(self, class_names: Optional[List[str]] = None, categorical_features: Optional[List[str]] = None, ):
         self._explainer = None
-        if len(class_names) != 2:
+        if class_names is not None and len(class_names) != 2:
             raise NotImplementedError('Trelawney only handles binary classification case for now. PR welcome ;)')
         self.class_names = class_names
         self._output_len = None
