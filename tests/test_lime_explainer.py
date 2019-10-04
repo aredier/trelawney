@@ -5,6 +5,13 @@ from xgboost import XGBClassifier
 from trelawney.lime_explainer import LimeExplainer
 
 
+def _do_explainer_test(explainer):
+    explanation = explainer.explain_local(pd.DataFrame([[5, 0.1], [95, -0.5]]))
+    assert len(explanation) == 2
+    for single_explanation in explanation:
+        assert abs(single_explanation['real']) > abs(single_explanation['fake'])
+
+
 def test_lime_explainer_single(fake_dataset, fitted_logistic_regression):
     explainer = LimeExplainer(class_names=['false', 'true'])
     explainer.fit(fitted_logistic_regression, *fake_dataset)
@@ -17,10 +24,7 @@ def test_lime_explainer_single(fake_dataset, fitted_logistic_regression):
 def test_lime_explainer_multiple(fake_dataset, fitted_logistic_regression):
     explainer = LimeExplainer(class_names=['false', 'true'])
     explainer.fit(fitted_logistic_regression, *fake_dataset)
-    explanation = explainer.explain_local(pd.DataFrame([[5, 0.1], [95, -0.5]]))
-    assert len(explanation) == 2
-    for single_explanation in explanation:
-        assert abs(single_explanation['real']) > abs(single_explanation['fake'])
+    _do_explainer_test(explainer)
 
 
 def test_lime_xgb(fake_dataset):
@@ -30,6 +34,13 @@ def test_lime_xgb(fake_dataset):
 
     explainer = LimeExplainer()
     explainer.fit(model, *fake_dataset)
+    _do_explainer_test(explainer)
+
+
+def test_lime_nn(fake_dataset, fitted_neural_network):
+
+    explainer = LimeExplainer(class_names=['false', 'true'])
+    explainer.fit(fitted_neural_network, *fake_dataset)
     explanation = explainer.explain_local(pd.DataFrame([[5, 0.1], [95, -0.5]]))
     assert len(explanation) == 2
     for single_explanation in explanation:
