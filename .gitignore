@@ -100,3 +100,48 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+**/*.rs.bk
+Cargo.lock
+.DS_Stores
+.idea/
+.cache/
+.vscode/
+*.pyc
+__pycache__/
+.python-version
+/trelawney.egg-info
+/.tox/
+/.eggs/
+.pytest_cache/
+.ipynb_checkpoints/
+.DS_Store
+node_modules
+/dist
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.editorconfig
+yarn.lock
+
+# doc
+docs/_build/*
+
+# notebooks
+*.ipynb
+!project_template/{{cookiecutter.project_name}}/notebooks/*.ipynb
