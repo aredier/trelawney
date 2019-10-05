@@ -93,6 +93,20 @@ class BaseExplainer(abc.ABC):
 
     def graph_local_explanation(self, x_explain: pd.DataFrame, cols: Optional[List[str]] = None,
                                 n_cols: Optional[int] = None) -> go.Figure:
+        """
+        creates a waterfall plotly figure to represent the influance of each feature on the final decision for a single
+        prediction of the model.
+
+        You can filter the columns you want to see in your graph and limit the final number of columns you want to see.
+        If you choose to do so the filter will be applied first and of those filtered columns at most `n_cols` will be
+        kept
+        
+        :param x_explain: the example of the model this must be a dataframe with a single ow
+        :param cols: the columns to keep if you want to filter (if None - default) all the columns will be kept
+        :param n_cols: the number of columns to limit the graph to. (if None - default) all the columns will be kept
+
+        :raises ValueError: if x_explain doesn't have the right shape
+        """
         if x_explain.shape[0] != 1:
             raise ValueError('can only explain single observations, if you only have one sample, use reshape(1, -1)')
         cols = cols or x_explain.columns
