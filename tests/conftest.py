@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 from keras import layers, models
 from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn import base
 from sklearn.linear_model import LogisticRegression
 
 
@@ -31,3 +32,20 @@ def fitted_neural_network(fake_dataset):
     model = KerasClassifier(make_neural_network, epochs=10, batch_size=100)
     model.fit(*fake_dataset)
     return model
+
+
+@pytest.fixture
+def FakeClassifier():
+
+    class FakeClassifierInner(base.BaseEstimator):
+
+        def fit(self, X, y):
+            return self
+
+        def predict_proba(self, X):
+            return np.array([[0.5, 0.5] for _ in  range(X.shape[0])])
+
+        def predict(self, X):
+            return self.predict_proba(X)[:, 1] >= 0.5
+
+    return FakeClassifierInner

@@ -2,6 +2,7 @@
 module that provides the base explainer class from which all future explainers will inherit
 """
 import abc
+import operator
 from typing import List, Optional, Dict
 
 import sklearn
@@ -50,14 +51,17 @@ class BaseExplainer(abc.ABC):
 
     @staticmethod
     def _filter_and_limit_dict(col_importance_dic: Dict[str, float], cols: List[str], n_cols: int):
-        return dict(sorted(
+        og_mvmt = sum(col_importance_dic.values())
+        sorted_and_filtered = dict(sorted(
             filter(
                 lambda col_and_importance: col_and_importance[0] in cols,
                 col_importance_dic.items()
             ),
-            key = lambda x: abs(x[1]),
+            key=lambda x: abs(x[1]),
             reverse=True
         )[:n_cols])
+        sorted_and_filtered['rest'] = sorted_and_filtered.get('rest', 0.) + (og_mvmt - sum(sorted_and_filtered.values()))
+        return sorted_and_filtered
 
     def filtered_feature_importance(self, x_explain: pd.DataFrame, cols: List[str],
                                     n_cols: Optional[int] = None) -> Dict[str, float]:
@@ -88,23 +92,24 @@ class BaseExplainer(abc.ABC):
         ]
 
     def graph_local_explanation(self, x_explain: pd.DataFrame, cols: Optional[List[str]] = None,
-                                n_cols: Optional[int] = None):
+                                n_cols: Optional[int] = None) -> go.Figure:
         if x_explain.shape[0] != 1:
             raise ValueError('can only explain single observations, if you only have one sample, use reshape(1, -1)')
         cols = cols or x_explain.columns
         importance_dict = self.explain_filtered_local(x_explain, cols=cols, n_cols=n_cols)[0]
 
-        output_value = self._model_to_explain.predict_proba(x_explain)[0, 1]
-        start_value = sum(importance_dict.values(), output_value)
-        rest = output_value - sum(importance_dict.values(), start_value)
+        output_value = self._model_to_explain.predict_proba(x_explain.values)[0, 1]
+        start_value = output_value - sum(importance_dict.values())
+        rest = importance_dict.pop('rest')
 
+        sorted_importances = sorted(importance_dict.items(), key=lambda importance: abs(importance[1]), reverse=True)
         fig = go.Figure(go.Waterfall(
             orientation="v",
             measure=['absolute', *['relative' for _ in importance_dict], 'relative', 'absolute'],
-            y=[start_value, *importance_dict.values(), rest, output_value],
+            y=[start_value, *map(operator.itemgetter(1), sorted_importances), rest, output_value],
             textposition="outside",
             #     text = ["+60", "+80", "", "-40", "-20", "Total"],
-            x=['start_value', *importance_dict.keys(), 'rest', 'output_value'],
+            x=['start_value', *map(operator.itemgetter(0), sorted_importances), 'rest', 'output_value'],
             connector={"line": {"color": "rgb(63, 63, 63)"}},
         ))
         fig.update_layout(

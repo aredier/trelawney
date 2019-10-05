@@ -1,3 +1,4 @@
+import operator
 from typing import List, Optional, Dict
 
 import pandas as pd
@@ -39,16 +40,16 @@ class LimeExplainer(BaseExplainer):
     """
 
     def __init__(self, class_names: Optional[List[str]] = None, categorical_features: Optional[List[str]] = None, ):
+        super().__init__()
         self._explainer = None
         if class_names is not None and len(class_names) != 2:
             raise NotImplementedError('Trelawney only handles binary classification case for now. PR welcome ;)')
         self.class_names = class_names
         self._output_len = None
         self.categorical_features = categorical_features
-        self._model_to_explain = None
 
     def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame, ):
-        self._model_to_explain = model
+        super().fit(model, x_train, y_train)
         self._explainer = lime_tabular.LimeTabularExplainer(x_train.values, feature_names=x_train.columns,
                                                             class_names=self.class_names,
                                                             categorical_features=self.categorical_features,
@@ -73,8 +74,12 @@ class LimeExplainer(BaseExplainer):
         for individual_sample in tqdm(x_explain.iterrows()):
             individual_explanation = self._explainer.explain_instance(individual_sample[1],
                                                                       self._model_to_explain.predict_proba,
-                                                                      num_features=n_cols,
+                                                                      num_features=x_explain.shape[1],
                                                                       top_labels=2)
-            res.append({self._extract_col_from_explanation(col_explanation): col_value
-                        for col_explanation, col_value in individual_explanation.as_list()})
+            individual_explanation = sorted(individual_explanation.as_list(), key=operator.itemgetter(1), reverse=True)
+            skewed_individual_explanation = {self._extract_col_from_explanation(col_name): col_importance
+                                             for col_name, col_importance in individual_explanation[:n_cols]}
+            rest = sum(map(operator.itemgetter(1), individual_explanation)) - sum(skewed_individual_explanation.values())
+            skewed_individual_explanation['rest'] = rest
+            res.append(skewed_individual_explanation)
         return res
