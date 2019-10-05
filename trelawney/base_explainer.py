@@ -53,7 +53,7 @@ class BaseExplainer(abc.ABC):
                 lambda col_and_importance: col_and_importance[0] in cols,
                 col_importance_dic.items()
             ),
-            key=operator.itemgetter(1),
+            key = lambda x: abs(x[1]),
             reverse=True
         )[:n_cols])
 
