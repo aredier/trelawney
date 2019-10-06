@@ -10,7 +10,3 @@ twine==1.14.0
 
 pytest==4.6.5
 pytest-runner==5.1
-
-tensorflow==1.14.0
-Keras==2.3.0
-xgboost==0.90
