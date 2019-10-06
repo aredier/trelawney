@@ -7,6 +7,7 @@ from typing import List, Optional, Dict
 
 import sklearn
 import pandas as pd
+import plotly.graph_objs as go
 
 
 class BaseExplainer(abc.ABC):
@@ -20,7 +21,9 @@ class BaseExplainer(abc.ABC):
       in a dataset
     """
 
-    @abc.abstractmethod
+    def __init__(self):
+        self._model_to_explain = None
+
     def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame):
         """
         fits the explainer if needed
@@ -29,7 +32,7 @@ class BaseExplainer(abc.ABC):
         :param x_train: the dataset the model was trained on originally
         :param y_train: the target the model was trained on originally
         """
-        pass
+        self._model_to_explain = model
 
     @abc.abstractmethod
     def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> Dict[str, float]:
@@ -48,14 +51,17 @@ class BaseExplainer(abc.ABC):
 
     @staticmethod
     def _filter_and_limit_dict(col_importance_dic: Dict[str, float], cols: List[str], n_cols: int):
-        return dict(sorted(
+        og_mvmt = sum(col_importance_dic.values())
+        sorted_and_filtered = dict(sorted(
             filter(
                 lambda col_and_importance: col_and_importance[0] in cols,
                 col_importance_dic.items()
             ),
-            key=operator.itemgetter(1),
+            key=lambda x: abs(x[1]),
             reverse=True
         )[:n_cols])
+        sorted_and_filtered['rest'] = sorted_and_filtered.get('rest', 0.) + (og_mvmt - sum(sorted_and_filtered.values()))
+        return sorted_and_filtered
 
     def filtered_feature_importance(self, x_explain: pd.DataFrame, cols: List[str],
                                     n_cols: Optional[int] = None) -> Dict[str, float]:
@@ -85,5 +91,43 @@ class BaseExplainer(abc.ABC):
             for sample_importance_dict in self.explain_local(x_explain)
         ]
 
-    def graph_local_explanation(self, x_explain: pd.DataFrame, cols: List[str], n_cols: Optional[int] = None):
-        raise NotImplementedError('graphing functionalities not implemented yet')
+    def graph_local_explanation(self, x_explain: pd.DataFrame, cols: Optional[List[str]] = None,
+                                n_cols: Optional[int] = None) -> go.Figure:
+        """
+        creates a waterfall plotly figure to represent the influance of each feature on the final decision for a single
+        prediction of the model.
+
+        You can filter the columns you want to see in your graph and limit the final number of columns you want to see.
+        If you choose to do so the filter will be applied first and of those filtered columns at most `n_cols` will be
+        kept
+        
+        :param x_explain: the example of the model this must be a dataframe with a single ow
+        :param cols: the columns to keep if you want to filter (if None - default) all the columns will be kept
+        :param n_cols: the number of columns to limit the graph to. (if None - default) all the columns will be kept
+
+        :raises ValueError: if x_explain doesn't have the right shape
+        """
+        if x_explain.shape[0] != 1:
+            raise ValueError('can only explain single observations, if you only have one sample, use reshape(1, -1)')
+        cols = cols or x_explain.columns
+        importance_dict = self.explain_filtered_local(x_explain, cols=cols, n_cols=n_cols)[0]
+
+        output_value = self._model_to_explain.predict_proba(x_explain.values)[0, 1]
+        start_value = output_value - sum(importance_dict.values())
+        rest = importance_dict.pop('rest')
+
+        sorted_importances = sorted(importance_dict.items(), key=lambda importance: abs(importance[1]), reverse=True)
+        fig = go.Figure(go.Waterfall(
+            orientation="v",
+            measure=['absolute', *['relative' for _ in importance_dict], 'relative', 'absolute'],
+            y=[start_value, *map(operator.itemgetter(1), sorted_importances), rest, output_value],
+            textposition="outside",
+            #     text = ["+60", "+80", "", "-40", "-20", "Total"],
+            x=['start_value', *map(operator.itemgetter(0), sorted_importances), 'rest', 'output_value'],
+            connector={"line": {"color": "rgb(63, 63, 63)"}},
+        ))
+        fig.update_layout(
+            title="explanation",
+            showlegend=True
+        )
+        return fig
