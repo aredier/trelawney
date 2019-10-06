@@ -27,11 +27,11 @@ class ShapExplainer(BaseExplainer):
     def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame):
         self._model_to_explain = model
         self._model_type = type(self._model_to_explain)
-        if self._model_type == LogisticRegression:
+        if isinstance(self._model_type, LogisticRegression):
             self._explainer = shap.LinearExplainer(self._model_to_explain, data=x_train)
-        elif self._model_type in [DecisionTreeClassifier, RandomForestClassifier, XGBClassifier]:
+        elif isinstance(self._model_type, (DecisionTreeClassifier, RandomForestClassifier, XGBClassifier)):
             self._explainer = shap.TreeExplainer(self._model_to_explain, data=x_train)
-        elif self._model_type == models.Model:
+        elif isinstance(self._model_type, models.Model):
             self._explainer = shap.DeepExplainer(self._model_to_explain, data=x_train)
         else:
             self._explainer = shap.KernelExplainer(self._model_to_explain, data=x_train)
