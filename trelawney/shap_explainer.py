@@ -20,7 +20,6 @@ class ShapExplainer(BaseExplainer):
     def __init__(self, class_names: Optional[List[str]] = None, categorical_features: Optional[List[str]] = None, ):
         self._explainer = None
         self.class_names = class_names
-        self.categorical_features = categorical_features
         self._model_to_explain = None
         self._model_type = None
 
@@ -41,7 +40,7 @@ class ShapExplainer(BaseExplainer):
         n_cols = n_cols or len(x_explain.columns)
         res = []
         for individual_sample in tqdm(range(len(x_explain))):
-            individual_explanation = {col: np.mean(np.abs(col_values)) for col, col_values in zip(x_explain.columns, shap_values[individual_sample].T)}
+            individual_explanation = {col: col_values for col, col_values in zip(x_explain.columns, shap_values[individual_sample].T)}
             individual_explanation = sorted(individual_explanation.items(), key=operator.itemgetter(1), reverse=True)[:n_cols]
             res.append(dict(individual_explanation))
         return res
