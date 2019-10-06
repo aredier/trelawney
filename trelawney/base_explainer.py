@@ -26,7 +26,7 @@ class BaseExplainer(abc.ABC):
 
     def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame):
         """
-        fits the explainer if needed
+        prepares the explainer by saving all the information it needs and fitting necessary models
 
         :param model: the TRAINED model the explainer will need to shed light on
         :param x_train: the dataset the model was trained on originally

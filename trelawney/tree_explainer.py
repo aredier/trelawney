@@ -1,11 +1,17 @@
 """
 Module that provides the TreeExplainer class base on the Baseexplainer class
 """
+import os
+import tempfile
+from typing import Optional, List, Dict
+
 import pandas as pd
-from subprocess import call
-from IPython.display import Image
 import sklearn
+from subprocess import call
 from sklearn import tree
+
+from trelawney.base_explainer import BaseExplainer
+
 
 class TreeExplainer(BaseExplainer):
     """
@@ -16,19 +22,18 @@ class TreeExplainer(BaseExplainer):
     - plot_tree (full tree visualisation)
     """
 
-    def __init__(self, class_names: Optional[List[str]] = None, categorical_features: Optional[List[str]] = None, ):
+    def __init__(self, class_names: Optional[List[str]] = None):
         """
         initialize class_names, categorical_features and model_to_explain
         """
         self.class_names = class_names
-        self.categorical_features = categorical_features
         self._model_to_explain = None
+        self._feature_names = None
 
-    def fit(self, model: sklearn.base.BaseEstimator):
-        """
-        _model_to_explain attribute gets the right model to explain
-        """
+    def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame):
+
         self._model_to_explain = model
+        self._feature_names = x_train.columns
 
     def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> Dict[str, float]:
         """
@@ -46,14 +51,17 @@ class TreeExplainer(BaseExplainer):
         :param n_cols: the maximum number of features to return
         """
         raise NotImplementedError('no consensus on which values can explain the path followed by an observation')
-    
-    def plot_tree(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None, out_file: str = 'tree_viz') -> Image:
+
+    def plot_tree(self, out_path: str = './tree_viz.png'):
         """
-        returns the colored plot of the decision tree and saves an Image in the wd.
-        :param x_explain: the dataset to explain on
-        :param n_cols: the maximum number of features to return
+        creates a png file of the tree saved in out_path
+
+        :param out_path: the path to save the png representation of the tree to
         """
-        tree.export_graphviz(self._model_to_explain, out_file = out_file + '.dot', filled=True, rounded=True,
-                special_characters=True, feature_names = x_explain.columns, class_names= self.class_names)
-        call(['dot', '-Tpng', out_file + '.dot', '-o', out_file + '.png', '-Gdpi=600'])
-        return Image(filename = out_file + '.png')
+        with tempfile.TemporaryDirectory() as dir_path:
+            dot_path = os.path.join(dir_path, 'tree.dot')
+
+            tree.export_graphviz(self._model_to_explain, out_file=dot_path + '.dot', filled=True, rounded=True,
+                                 special_characters=True, feature_names=self._feature_names,
+                                 class_names=self.class_names)
+            call(['dot', '-Tpng', dot_path, '-o', out_path, '-Gdpi=600'])
