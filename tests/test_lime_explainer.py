@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from xgboost import XGBClassifier
 
@@ -34,6 +35,8 @@ def test_lime_xgb(fake_dataset):
 
     explainer = LimeExplainer()
     explainer.fit(model, *fake_dataset)
+    with pytest.raises(TypeError):
+        explainer.explain_local(x.values)
     _do_explainer_test(explainer)
 
 
