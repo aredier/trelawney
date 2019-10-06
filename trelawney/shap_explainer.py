@@ -46,18 +46,8 @@ class ShapExplainer(BaseExplainer):
             res.append(dict(individual_explanation))
         return res
 
-
-"""
-
     def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> Dict[str, float]:
-        shap_dict = dict(zip(X_test.columns.to_list(), list(np.mean(abs(shap_values_XGB_test), axis = 0).tolist())))
-        kept_shap_bar_cols = dict(sorted(shap_dict.items(), key=lambda x: np.abs(x[1]), reverse=True,)[:N_COMPS])
-
-
-
-    def graph_feature_importance(self, x_explain: pd.DataFrame, cols: List[str], n_cols: Optional[int] = None):
-        pass
-
-    def graph_local_explanation(self, x_explain: pd.DataFrame, cols: List[str], n_cols: Optional[int] = None):
-        pass
-"""
+        shap_values = self._explainer.shap_values(x_explain)
+        shap_dict = dict(zip(x_explain.columns.to_list(), list(np.mean(abs(shap_values), axis=0).tolist())))
+        kept_shap_bar_cols = dict(sorted(shap_dict.items(), key=lambda x: np.abs(x[1]), reverse=True,)[:n_cols])
+        return kept_shap_bar_cols
