@@ -29,7 +29,7 @@ def fitted_neural_network(fake_dataset):
         model.compile(loss='categorical_crossentropy', optimizer='adam')
         return model
 
-    model = KerasClassifier(make_neural_network, epochs=10, batch_size=100)
+    model = KerasClassifier(make_neural_network, epochs=100, batch_size=100)
     model.fit(*fake_dataset)
     return model
 
