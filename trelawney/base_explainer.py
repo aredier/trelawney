@@ -80,7 +80,8 @@ class BaseExplainer(abc.ABC):
         :param x_explain: the samples to explain
         :param n_cols: the number of columns to limit the explanation to
         """
-        pass
+        if not isinstance(x_explain, pd.DataFrame):
+            raise TypeError('{} is not supported, please use dataframes'.format(type(x_explain)))
 
     def explain_filtered_local(self, x_explain: pd.DataFrame, cols: List[str],
                                n_cols: Optional[int] = None) -> List[Dict[str, float]]:
@@ -100,7 +101,7 @@ class BaseExplainer(abc.ABC):
         You can filter the columns you want to see in your graph and limit the final number of columns you want to see.
         If you choose to do so the filter will be applied first and of those filtered columns at most `n_cols` will be
         kept
-        
+
         :param x_explain: the example of the model this must be a dataframe with a single ow
         :param cols: the columns to keep if you want to filter (if None - default) all the columns will be kept
         :param n_cols: the number of columns to limit the graph to. (if None - default) all the columns will be kept

@@ -10,7 +10,7 @@ from sklearn.linear_model import LogisticRegression
 @pytest.fixture
 def fake_dataset():
     return (pd.DataFrame([list(range(100)), np.random.normal(size=100).tolist()], index=['real', 'fake']).T,
-            np.array(range(100)) > 50)
+            (np.array(range(100)) > 50).astype(np.int16))
 
 
 @pytest.fixture

@@ -67,8 +67,7 @@ class LimeExplainer(BaseExplainer):
         return col_explanation.split()[2]
 
     def explain_local(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> List[Dict[str, float]]:
-        if not isinstance(x_explain, pd.DataFrame):
-            raise TypeError('{} is not supported, please use dataframes'.format(type(x_explain)))
+        super().explain_local(x_explain)
         n_cols = n_cols or len(x_explain.columns)
         res = []
         for individual_sample in tqdm(x_explain.iterrows()):
