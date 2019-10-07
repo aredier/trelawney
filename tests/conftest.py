@@ -5,6 +5,7 @@ from keras import layers, models
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn import base
 from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
 
 
 @pytest.fixture
@@ -49,3 +50,11 @@ def FakeClassifier():
             return self.predict_proba(X)[:, 1] >= 0.5
 
     return FakeClassifierInner
+
+
+@pytest.fixture
+def fitted_decision_tree(fake_dataset):
+
+    model = DecisionTreeClassifier()
+    model.fit(*fake_dataset)
+    return model
