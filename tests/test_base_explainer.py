@@ -137,3 +137,18 @@ def test_local_graph(FakeClassifier, fake_dataset):
     waterfall = graph.data[0]
     assert waterfall.x == ('start_value', 'var_2', 'rest', 'output_value')
     assert waterfall.y == (0., .75, -0.25, 0.5)
+
+
+def test_feature_importance_graph(FakeClassifier, fake_dataset):
+    model = FakeClassifier()
+    explainer = FakeExplainer()
+    explainer.fit(model, *fake_dataset)
+    graph = explainer.graph_feature_importance(
+        pd.DataFrame([[10, 0, 4], [0, -5, 3]], columns=['var_1', 'var_2', 'var_3']), n_cols=1, cols=['var_1', 'var_3']
+    )
+    assert len(graph.data) == 1
+    assert isinstance(graph.data[0], go.Bar)
+    bar_graph = graph.data[0]
+    assert bar_graph.x == ('var_1', 'rest')
+    assert abs(bar_graph.y[0] - 10 / 22) < 0.0001
+    assert abs(bar_graph.y[1] + 2 / 22) < 0.0001
