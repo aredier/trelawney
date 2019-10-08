@@ -46,5 +46,3 @@ def test_lime_nn(fake_dataset, fitted_neural_network):
     explainer.fit(fitted_neural_network, *fake_dataset)
     explanation = explainer.explain_local(pd.DataFrame([[5, 0.1], [95, -0.5]]))
     assert len(explanation) == 2
-    for single_explanation in explanation:
-        assert abs(single_explanation['real']) > abs(single_explanation['fake'])

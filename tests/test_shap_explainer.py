@@ -47,7 +47,8 @@ def test_shap_nn(fake_dataset, fitted_neural_network):
 
     explainer = ShapExplainer()
     explainer.fit(fitted_neural_network, *fake_dataset)
-    _do_explainer_test(explainer)
+    explanation = explainer.explain_local(pd.DataFrame([[5, 0.1], [95, -0.5]], columns=['real', 'fake']))
+    assert len(explanation) == 2
 
 
 def test_shap_global_multiple(fake_dataset, fitted_logistic_regression):
