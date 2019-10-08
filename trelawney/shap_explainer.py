@@ -41,6 +41,7 @@ class ShapExplainer(BaseExplainer):
     def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame):
         super().fit(model, x_train, y_train)
         self._explainer = self._find_right_explainer(x_train)
+        return self
 
     def _get_shap_values(self, x_explain):
         shap_values = self._explainer.shap_values(x_explain.values)
