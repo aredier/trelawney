@@ -75,9 +75,9 @@ class BaseExplainer(abc.ABC):
         feature_importance = self.filtered_feature_importance(x_explain, cols, n_cols)
         rest = feature_importance.pop('rest')
         sorted_feature_importance = sorted(feature_importance.items(), key=operator.itemgetter(1), reverse=True)
-        colors = ['#3B577C' if col not in irrelevant_cols else '#8292AF'
+        colors = ['#002651' if col not in irrelevant_cols else '#8292AF'
                   for col in map(operator.itemgetter(0), sorted_feature_importance)]
-        colors.append('#0077ff')
+        colors.append('#3B577C')
         plot = go.Bar(x=list(map(operator.itemgetter(0), sorted_feature_importance)) + ['rest'],
                       y=list(map(operator.itemgetter(1), sorted_feature_importance)) + [rest],
                       marker_color=colors)
