@@ -37,7 +37,7 @@ class LogRegExplainer(BaseExplainer):
 
     def _compute_odds_ratio(self):
         res = pd.DataFrame({'variables': self._feature_names, 
-                                   'odds_ratio': np.exp(self._model_to_explain.coef_[0])}).set_index('variables')
+                            'odds_ratio': np.exp(self._model_to_explain.coef_[0])}).set_index('variables')
         return res
 
     def graph_odds_ratio(self, n_cols: Optional[int] = 10, ascending: bool = False):
