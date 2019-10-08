@@ -1,11 +1,16 @@
 """
 Module that provides the LogRegExplainer class base on the BaseExplainer class
 """
+import operator
+from typing import Optional, List, Dict
+
 import pandas as pd
 import numpy as np
 import sklearn
-import seaborn as sns
-import matplotlib.pyplot as plt
+import plotly.graph_objs as go
+from trelawney.base_explainer import BaseExplainer
+from trelawney.colors import BLUE, GREY
+
 
 class LogRegExplainer(BaseExplainer):
     """
@@ -21,8 +26,9 @@ class LogRegExplainer(BaseExplainer):
         """
         self.class_names = class_names
         self._model_to_explain = None
+        self._feature_names = None
 
-    def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame): 
+    def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame):
         self._model_to_explain = model
         self._feature_names = x_train.columns
 
@@ -36,24 +42,33 @@ class LogRegExplainer(BaseExplainer):
         return res
 
     def _compute_odds_ratio(self):
-        res = pd.DataFrame({'variables': self._feature_names, 
+        res = pd.DataFrame({'variables': self._feature_names,
                             'odds_ratio': np.exp(self._model_to_explain.coef_[0])}).set_index('variables')
         return res
 
-    def graph_odds_ratio(self, n_cols: Optional[int] = 10, ascending: bool = False):
+    def graph_odds_ratio(self, n_cols: Optional[int] = 10, ascending: bool = False,
+                         irrelevant_cols: Optional[List[str]] = None) -> pd.DataFrame:
         """
         returns a plot of the top k features, based on the magnitude of their odds ratio.
         :n_cols: number of features to plot
         :ascending: order of the ranking of the magnitude of the coefficients
         """
-        dataset_to_plot = self._compute_odds_ratio().sort_values(['odds_ratio'], ascending=ascending).head(n_cols)
+        irrelevant_cols = irrelevant_cols or []
+        all_odds = self._compute_odds_ratio()
+        odds_ratio_dict = dict(zip(all_odds.index, all_odds.odds_ratio))
+        dataset_to_plot = sorted(odds_ratio_dict.items(), key=lambda x: abs(x[1]), reverse=not ascending)[:n_cols]
 
-        fig, ax = plt.subplots(figsize=(10,10))
-
-        sns.barplot(y=dataset_to_plot.index, x=dataset_to_plot['odds_ratio'], ax=ax, palette=sns.color_palette("RdBu", n_colors=7))
-        ax.set_title('Top %i variables, based on their odds ratio'%(n_cols))
-        plt.show()
-        return ax
+        colors = [BLUE if col not in irrelevant_cols else GREY
+                  for col in map(operator.itemgetter(0), dataset_to_plot)]
+        plot = go.Bar(x=list(map(operator.itemgetter(0), dataset_to_plot)),
+                      y=list(map(operator.itemgetter(1), dataset_to_plot)),
+                      marker_color=colors)
+        fig = go.Figure(plot)
+        fig.update_layout(
+            title='Top {} variables, based on their odds ratio'.format(n_cols),
+            showlegend=True
+        )
+        return fig
 
     def explain_local(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> List[Dict[str, float]]:
         """

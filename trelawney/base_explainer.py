@@ -8,6 +8,7 @@ from typing import List, Optional, Dict
 import sklearn
 import pandas as pd
 import plotly.graph_objs as go
+from trelawney.colors import BLUE, GREY
 
 
 class BaseExplainer(abc.ABC):
@@ -75,9 +76,9 @@ class BaseExplainer(abc.ABC):
         feature_importance = self.filtered_feature_importance(x_explain, cols, n_cols)
         rest = feature_importance.pop('rest')
         sorted_feature_importance = sorted(feature_importance.items(), key=operator.itemgetter(1), reverse=True)
-        colors = ['#002651' if col not in irrelevant_cols else '#8292AF'
+        colors = [BLUE if col not in irrelevant_cols else GREY
                   for col in map(operator.itemgetter(0), sorted_feature_importance)]
-        colors.append('#3B577C')
+        colors.append(GREY)
         plot = go.Bar(x=list(map(operator.itemgetter(0), sorted_feature_importance)) + ['rest'],
                       y=list(map(operator.itemgetter(1), sorted_feature_importance)) + [rest],
                       marker_color=colors)
