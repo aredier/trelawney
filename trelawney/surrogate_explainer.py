@@ -1,12 +1,13 @@
 import operator
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Callable, Tuple, Union
 
 import pandas as pd
+import numpy as np
 import sklearn
 
 from trelawney.base_explainer import BaseExplainer
 import trelawney.tree_explainer
-import trelawney.logreg_explainer
+# import trelawney.logreg_explainer
 
 
 class SurrogateExplainer(BaseExplainer):
@@ -26,19 +27,21 @@ class SurrogateExplainer(BaseExplainer):
         self._model_to_explain = None
         self._adequation_metric = None
 
-    def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.Dataframe, ):
+    def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame, ):
         self._model_to_explain = model
-        self._x_train = x_train
+        self._x_train = x_train.values
         if type(self._surrogate) == sklearn.tree.tree.DecisionTreeClassifier:
-            self._surrogate.fit(x_train, self._model_to_explain.predict(x_train))
+            self._surrogate.fit(self._x_train, self._model_to_explain.predict(self._x_train))
             self._adequation_metric = sklearn.metrics.accuracy_score
-            self._explainer = trelawney.tree_explainer.TreeExplainer().fit(self._surrogate)
+            self._explainer = trelawney.tree_explainer.TreeExplainer().fit(self._surrogate, x_train, y_train)
         else:
-            self._surrogate.fit(x_train, self._model_to_explain.predict_probas(x_train))
-            self._adequation_metric = sklearn.metrics.mean_squared_error
-            self._explainer = trelawney.logreg_explainer.LogRegExplainer().fit(self._surrogate)
+            raise NotImplementedError
+            # self._surrogate.fit(x_train, self._model_to_explain.predict_probas(x_train))
+            # self._adequation_metric = sklearn.metrics.mean_squared_error
+            # self._explainer = trelawney.logreg_explainer.LogRegExplainer().fit(self._surrogate)
+        return self
 
-    def adequation_score(self, metric: Optional[sklearn.metrics] = 'auto', ):
+    def adequation_score(self, metric: Union[Callable[[np.ndarray, np.ndarray], float], str] = 'auto', ):
         """
         returns an adequation score between the output of the surrogate and the output of the initial model based on
         the x_train set given.
@@ -46,7 +49,7 @@ class SurrogateExplainer(BaseExplainer):
         if metric != 'auto':
             self._adequation_metric = metric
         return self._adequation_metric(self._model_to_explain.predict(self._x_train),
-                                       self._surrogate(self._x_train))
+                                       self._surrogate.predict(self._x_train))
 
     def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None, ) -> Dict[str, float]:
         """
@@ -64,7 +67,7 @@ class SurrogateExplainer(BaseExplainer):
         """
         return self._explainer.explain_local(x_explain, n_cols)
 
-    def plot_tree(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None, out_file: str = 'tree_viz', ) -> Image:
+    def plot_tree(self, out_path: str = './tree_viz.png'):
         """
         returns the colored plot of the decision tree and saves an Image in the wd.
         :param x_explain: the dataset to explain on
@@ -73,5 +76,5 @@ class SurrogateExplainer(BaseExplainer):
         """
         if type(self._surrogate) != sklearn.tree.tree.DecisionTreeClassifier:
             raise TypeError('plot_tree is only available for single tree surrogate')
-        return self._explainer.plot_tree(x_explain, n_cols=n_cols, out_file=out_file)
+        return self._explainer.plot_tree(out_path=out_path)
 

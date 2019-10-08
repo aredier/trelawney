@@ -31,6 +31,7 @@ class LimeExplainer(BaseExplainer):
         >>> # creating and fiting the explainer
         >>> explainer = LimeExplainer()
         >>> explainer.fit(model, X, y)
+        <trelawney.lime_explainer.LimeExplainer object at ...>
         >>> # explaining observation
         >>> explanation =  explainer.explain_local(pd.DataFrame([[5, 0.1]]))[0]
         >>> abs(explanation['real']) > abs(explanation['fake'])
@@ -54,6 +55,7 @@ class LimeExplainer(BaseExplainer):
                                                             class_names=self.class_names,
                                                             categorical_features=self.categorical_features,
                                                             discretize_continuous=True)
+        return self
 
     def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> Dict[str, float]:
         raise NotImplementedError('we are not sure global explaination is mathematically sound for LIME, it is still'
