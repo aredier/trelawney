@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 class LogRegExplainer(BaseExplainer):
     """
     The LogRegExplainer class is composed of 3 methods:
-    - fit: get the right model and preprocess its output
+    - fit: get the right model
     - feature_importance (global interpretation)
     - graph_odds_ratio (visualisation of the ranking of the features, based on their odds ratio)
     """
@@ -20,7 +20,6 @@ class LogRegExplainer(BaseExplainer):
         initialize class_names, categorical_features and model_to_explain
         """
         self.class_names = class_names
-        self.categorical_features = categorical_features
         self._model_to_explain = None
 
     def fit(self, model: sklearn.base.BaseEstimator, , x_train: pd.DataFrame, y_train: pd.DataFrame): 
