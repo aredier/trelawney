@@ -29,27 +29,18 @@ class ShapExplainer(BaseExplainer):
         super().__init__()
         self._explainer = None
 
-    @staticmethod
-    def _find_right_explainer_class(model):
-        if isinstance(model, LogisticRegression):
-            return shap.LinearExplainer
-        if isinstance(model, (BaseDecisionTree, ForestClassifier, XGBClassifier)):
-            return shap.TreeExplainer
-        if isinstance(model, keras.models.Model):
-            return shap.DeepExplainer
-        raise ValueError(type(model))
-        return shap.KernelExplainer
+    def _find_right_explainer(self, x_train):
+        if isinstance(self._model_to_explain, LogisticRegression):
+            return shap.LinearExplainer(self._model_to_explain, data=x_train.values)
+        if isinstance(self._model_to_explain, (BaseDecisionTree, ForestClassifier, XGBClassifier)):
+            return shap.TreeExplainer(self._model_to_explain)
+        if isinstance(self._model_to_explain, KerasClassifier):
+            return shap.DeepExplainer(self._model_to_explain.model, data=x_train.values)
+        return shap.KernelExplainer(self._model_to_explain, data=x_train.values)
 
     def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame):
         super().fit(model, x_train, y_train)
-        if isinstance(self._model_to_explain, KerasClassifier):
-            self._explainer = self._find_right_explainer_class(self._model_to_explain.model)(
-                self._model_to_explain.model, data=x_train.values
-            )
-            return
-        self._explainer = self._find_right_explainer_class(self._model_to_explain)(
-            self._model_to_explain, data=x_train.values
-        )
+        self._explainer = self._find_right_explainer(x_train)
 
     def _get_shap_values(self, x_explain):
         shap_values = self._explainer.shap_values(x_explain.values)
@@ -81,6 +72,6 @@ class ShapExplainer(BaseExplainer):
 
     def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> Dict[str, float]:
         shap_values = self._get_shap_values(x_explain)
-        shap_dict = dict(zip(x_explain.columns.to_list(), list(np.mean(abs(shap_values), axis=0).tolist())))
-        kept_shap_bar_cols = dict(sorted(shap_dict.items(), key=lambda x: np.abs(x[1]), reverse=True,)[:n_cols])
+        shap_dict = dict(zip(x_explain.columns.to_list(), np.mean(np.abs(shap_values), axis=0).reshape(-1).tolist()))
+        kept_shap_bar_cols = dict(sorted(shap_dict.items(), key=lambda x: abs(x[1]), reverse=True,)[:n_cols])
         return kept_shap_bar_cols
