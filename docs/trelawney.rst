@@ -20,6 +20,22 @@ trelawney.lime\_explainer module
     :undoc-members:
     :show-inheritance:
 
+trelawney.shap\_explainer module
+--------------------------------
+
+.. automodule:: trelawney.shap_explainer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+trelawney.tree\_explainer module
+--------------------------------
+
+.. automodule:: trelawney.tree_explainer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 trelawney.trelawney module
 --------------------------
 

@@ -63,14 +63,19 @@ class BaseExplainer(abc.ABC):
         sorted_and_filtered['rest'] = sorted_and_filtered.get('rest', 0.) + (og_mvmt - sum(sorted_and_filtered.values()))
         return sorted_and_filtered
 
-    def filtered_feature_importance(self, x_explain: pd.DataFrame, cols: List[str],
+    def filtered_feature_importance(self, x_explain: pd.DataFrame, cols: Optional[List[str]],
                                     n_cols: Optional[int] = None) -> Dict[str, float]:
         """same as `feature_importance` but applying a filter first (on the name of the column)"""
-
         return self._filter_and_limit_dict(self.feature_importance(x_explain), cols, n_cols)
 
-    def graph_feature_importance(self, x_explain: pd.DataFrame, cols: List[str], n_cols: Optional[int] = None):
-        raise NotImplementedError('graphing functionalities not implemented yet')
+    def graph_feature_importance(self, x_explain: pd.DataFrame, cols: List[str] = None, n_cols: Optional[int] = None):
+        cols = cols or x_explain.columns.to_list()
+        feature_importance = self.filtered_feature_importance(x_explain, cols, n_cols)
+        rest = feature_importance.pop('rest')
+        sorted_feature_importance = sorted(feature_importance.items(), key=operator.itemgetter(1), reverse=True)
+        plot = go.Bar(x=list(map(operator.itemgetter(0), sorted_feature_importance)) + ['rest'],
+                      y=list(map(operator.itemgetter(1), sorted_feature_importance)) + [rest])
+        return go.Figure(plot)
 
     @abc.abstractmethod
     def explain_local(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> List[Dict[str, float]]:
@@ -110,7 +115,7 @@ class BaseExplainer(abc.ABC):
         """
         if x_explain.shape[0] != 1:
             raise ValueError('can only explain single observations, if you only have one sample, use reshape(1, -1)')
-        cols = cols or x_explain.columns
+        cols = cols or x_explain.columns.to_list()
         importance_dict = self.explain_filtered_local(x_explain, cols=cols, n_cols=n_cols)[0]
 
         output_value = self._model_to_explain.predict_proba(x_explain.values)[0, 1]
