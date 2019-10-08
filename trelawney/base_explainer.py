@@ -68,13 +68,19 @@ class BaseExplainer(abc.ABC):
         """same as `feature_importance` but applying a filter first (on the name of the column)"""
         return self._filter_and_limit_dict(self.feature_importance(x_explain), cols, n_cols)
 
-    def graph_feature_importance(self, x_explain: pd.DataFrame, cols: List[str] = None, n_cols: Optional[int] = None):
+    def graph_feature_importance(self, x_explain: pd.DataFrame, cols: Optional[List[str]] = None, n_cols: Optional[int] = None,
+                                 irrelevant_cols: Optional[List[str]] = None):
         cols = cols or x_explain.columns.to_list()
+        irrelevant_cols = irrelevant_cols or []
         feature_importance = self.filtered_feature_importance(x_explain, cols, n_cols)
         rest = feature_importance.pop('rest')
         sorted_feature_importance = sorted(feature_importance.items(), key=operator.itemgetter(1), reverse=True)
+        colors = ['#3B577C' if col not in irrelevant_cols else '#8292AF'
+                  for col in map(operator.itemgetter(0), sorted_feature_importance)]
+        colors.append('#0077ff')
         plot = go.Bar(x=list(map(operator.itemgetter(0), sorted_feature_importance)) + ['rest'],
-                      y=list(map(operator.itemgetter(1), sorted_feature_importance)) + [rest])
+                      y=list(map(operator.itemgetter(1), sorted_feature_importance)) + [rest],
+                      marker_color=colors)
         return go.Figure(plot)
 
     @abc.abstractmethod
