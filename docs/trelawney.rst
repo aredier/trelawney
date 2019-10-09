@@ -12,6 +12,14 @@ trelawney.base\_explainer module
     :undoc-members:
     :show-inheritance:
 
+trelawney.colors module
+-----------------------
+
+.. automodule:: trelawney.colors
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 trelawney.lime\_explainer module
 --------------------------------
 
@@ -20,10 +28,26 @@ trelawney.lime\_explainer module
     :undoc-members:
     :show-inheritance:
 
+trelawney.logreg\_explainer module
+----------------------------------
+
+.. automodule:: trelawney.logreg_explainer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 trelawney.shap\_explainer module
 --------------------------------
 
 .. automodule:: trelawney.shap_explainer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+trelawney.surrogate\_explainer module
+-------------------------------------
+
+.. automodule:: trelawney.surrogate_explainer
     :members:
     :undoc-members:
     :show-inheritance:
