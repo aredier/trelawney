@@ -48,28 +48,26 @@ __________________________________
 
 Here is an example of how to use a Trelawney explainer
 
-    >>> model = LogisticRegression().fit(X, y)
-    >>> # creating and fiting the explainer
-    >>> explainer = ShapExplainer()
-    >>> explainer.fit(model, X, y)
-    >>> # explaining observation
-    >>> explanation =  explainer.explain_local(X_expain)
-    [
-        {'var_1': 0.1, 'var_2': -0.07, ...},
-        ...
-        {'var_1': 0.23, 'var_2': -0.15, ...} ,
-    ]
-    >>> explanation =  explainer.graph_local_explanation(X_expain.iloc[:1, :])
+>>> model = LogisticRegression().fit(X, y)
+>>> # creating and fiting the explainer
+>>> explainer = ShapExplainer()
+>>> explainer.fit(model, X, y)
+>>> # explaining observation
+>>> explanation =  explainer.explain_local(X_expain)
+[
+    {'var_1': 0.1, 'var_2': -0.07, ...},
+    ...
+    {'var_1': 0.23, 'var_2': -0.15, ...} ,
+]
+>>> explanation =  explainer.graph_local_explanation(X_expain.iloc[:1, :])
 
 .. image:: http://drive.google.com/uc?export=view&id=1a1kdH8mjGdKiiF_JHR56L2-JeaRStwr2
    :width: 400
    :alt: Local Explanation Graph
 
-To do local explanations
-
-    >>> explanation =  explainer.feature_importance(X_expain)
-    {'var_1': 0.5, 'var_2': 0.2, ...} ,
-    >>> explanation =  explainer.graph_feature_importance(X_expain)
+>>> explanation =  explainer.feature_importance(X_expain)
+{'var_1': 0.5, 'var_2': 0.2, ...} ,
+>>> explanation =  explainer.graph_feature_importance(X_expain)
 
 
 .. image:: http://drive.google.com/uc?export=view&id=1R2NFEU0bcZYpeiFsLZDKYfPkjHz-cHJ_
