@@ -16,7 +16,7 @@ class SurrogateExplainer(BaseExplainer):
     generally simpler than the initial ones. Here, we use single trees and logistic regressions as surrogates.
     """
 
-    def __init__(self, surrogate_model: sklearn.base.BaseEstimator, ):
+    def __init__(self, surrogate_model: sklearn.base.BaseEstimator, class_names: Optional[List[str]] = None):
         if type(surrogate_model) not in [sklearn.tree.tree.DecisionTreeClassifier,
                                          sklearn.linear_model.base.LinearRegression]:
             raise NotImplementedError('SurrogateExplainer is only available for single trees (single_tree) and logistic'
@@ -26,6 +26,7 @@ class SurrogateExplainer(BaseExplainer):
         self._x_train = None
         self._model_to_explain = None
         self._adequation_metric = None
+        self._class_names = class_names
 
     def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame, ):
         self._model_to_explain = model
@@ -33,7 +34,7 @@ class SurrogateExplainer(BaseExplainer):
         if type(self._surrogate) == sklearn.tree.tree.DecisionTreeClassifier:
             self._surrogate.fit(self._x_train, self._model_to_explain.predict(self._x_train))
             self._adequation_metric = sklearn.metrics.accuracy_score
-            self._explainer = trelawney.tree_explainer.TreeExplainer().fit(self._surrogate, x_train, y_train)
+            self._explainer = trelawney.tree_explainer.TreeExplainer(self._class_names).fit(self._surrogate, x_train, y_train)
         else:
             raise NotImplementedError
             # self._surrogate.fit(x_train, self._model_to_explain.predict_probas(x_train))

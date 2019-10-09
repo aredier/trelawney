@@ -137,10 +137,13 @@ class BaseExplainer(abc.ABC):
             textposition="outside",
             #     text = ["+60", "+80", "", "-40", "-20", "Total"],
             x=['start_value', *map(operator.itemgetter(0), sorted_importances), 'rest', 'output_value'],
-            connector={"line": {"color": "rgb(63, 63, 63)"}},
+            connector={"line": {"color": GREY}},
+            decreasing={"marker": {"color": '#DB643D'}},
+            increasing={"marker": {"color": '#3DDC97'}},
+            totals={"marker": {"color": BLUE}},
         ))
         fig.update_layout(
             title="explanation",
-            showlegend=True
+            showlegend=False
         )
         return fig
