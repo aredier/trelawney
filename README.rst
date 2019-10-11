@@ -44,7 +44,7 @@ The Trelawney package is build around:
      model explains the black box one
 
 Quick Tutorial (30s to Trelawney):
-__________________________________
+----------------------------------
 
 Here is an example of how to use a Trelawney explainer
 
@@ -75,7 +75,7 @@ Here is an example of how to use a Trelawney explainer
    :alt: Local Explanation Graph
 
 FAQ
-___
+---
 
    Why should I use Trelawney rather than Lime_ and SHAP_
 
