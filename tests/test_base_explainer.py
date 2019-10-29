@@ -139,6 +139,23 @@ def test_local_graph(FakeClassifier, fake_dataset):
     assert waterfall.y == (0., .75, -0.25, 0.5)
 
 
+def test_local_graph_hover_text(FakeClassifier, fake_dataset):
+
+    model = FakeClassifier()
+    explainer = FakeExplainer()
+    explainer.fit(model, *fake_dataset)
+
+    graph = explainer.graph_local_explanation(pd.DataFrame([[10, 30]], columns=['var_1', 'var_2']),
+                                              info_values=pd.DataFrame([['foo', 3]], columns=['var_1', 'var_2']))
+
+    assert len(graph.data) == 1
+    assert isinstance(graph.data[0], go.Waterfall)
+    waterfall = graph.data[0]
+    assert waterfall.hovertext == ('start value', 'var_2 = 3', 'var_1 = foo', 'rest', 'output_value = 0.5')
+
+    graph = explainer.graph_local_explanation(pd.DataFrame([[10, 30]], columns=['var_1', 'var_2']), n_cols=1)
+
+
 def test_feature_importance_graph(FakeClassifier, fake_dataset):
     model = FakeClassifier()
     explainer = FakeExplainer()

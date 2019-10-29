@@ -168,7 +168,7 @@ class BaseExplainer(abc.ABC):
         rest = importance_dict.pop('rest')
 
         sorted_importances = sorted(importance_dict.items(), key=lambda importance: abs(importance[1]), reverse=True)
-        hovertext = ['base_value,',
+        hovertext = ['start value',
                      *['{} = {}'.format(col_name, info_values[col_name]) for col_name, col_value in sorted_importances],
                      'rest', 'output_value = {}'.format(output_value)]
         fig = go.Figure(go.Waterfall(
