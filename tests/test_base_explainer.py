@@ -152,3 +152,23 @@ def test_feature_importance_graph(FakeClassifier, fake_dataset):
     assert bar_graph.x == ('var_1', 'rest')
     assert abs(bar_graph.y[0] - 10 / 22) < 0.0001
     assert abs(bar_graph.y[1] + 2 / 22) < 0.0001
+
+
+def test_mixed_imputs():
+    explainer = FakeExplainer()
+
+    assert all(explainer._get_dataframe_from_mixed_input(
+        pd.DataFrame([[1, 2, 3]], columns=['foo', 'bar', 'baz'])
+    ) == pd.DataFrame([[1, 2, 3]], columns=['foo', 'bar', 'baz']))
+
+    assert all(explainer._get_dataframe_from_mixed_input(
+        pd.Series([1, 2, 3], index=['foo', 'bar', 'baz'])
+    ) == pd.DataFrame([[1, 2, 3]], columns=['foo', 'bar', 'baz']))
+
+    assert all(explainer._get_dataframe_from_mixed_input(
+        np.array([1, 2, 3])
+    ) == pd.DataFrame([[1, 2, 3]], columns=['feature_0', 'feature_1', 'feature_2']))
+
+    assert all(explainer._get_dataframe_from_mixed_input(
+        np.array([[1, 2, 3]])
+    ) == pd.DataFrame([[1, 2, 3]], columns=['feature_0', 'feature_1', 'feature_2']))

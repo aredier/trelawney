@@ -1,7 +1,8 @@
 import operator
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
 
 import pandas as pd
+import numpy as np
 import sklearn
 from lime import lime_tabular
 from tqdm import tqdm
@@ -49,7 +50,9 @@ class LimeExplainer(BaseExplainer):
         self._output_len = None
         self.categorical_features = categorical_features
 
-    def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame, ):
+    def fit(self, model: sklearn.base.BaseEstimator, x_train: Union[pd.Series, pd.DataFrame, np.ndarray],
+            y_train: pd.DataFrame, ):
+        x_train = self._get_dataframe_from_mixed_input(x_train)
         super().fit(model, x_train, y_train)
         self._explainer = lime_tabular.LimeTabularExplainer(x_train.values, feature_names=x_train.columns,
                                                             class_names=self.class_names,
@@ -57,7 +60,8 @@ class LimeExplainer(BaseExplainer):
                                                             discretize_continuous=True)
         return self
 
-    def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> Dict[str, float]:
+    def feature_importance(self, x_explain: Union[pd.Series, pd.DataFrame, np.ndarray],
+                           n_cols: Optional[int] = None) -> Dict[str, float]:
         raise NotImplementedError('we are not sure global explaination is mathematically sound for LIME, it is still'
                                   ' debated, refer tp https://github.com/skanderkam/trelawney/issues/10')
 
@@ -68,8 +72,11 @@ class LimeExplainer(BaseExplainer):
             return col_explanation.split()[0]
         return col_explanation.split()[2]
 
-    def explain_local(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> List[Dict[str, float]]:
+    def explain_local(self, x_explain: Union[pd.Series, pd.DataFrame, np.ndarray],
+                      n_cols: Optional[int] = None) -> List[Dict[str, float]]:
+        x_explain = self._get_dataframe_from_mixed_input(x_explain)
         super().explain_local(x_explain)
+        x_explain = self._get_dataframe_from_mixed_input(x_explain)
         n_cols = n_cols or len(x_explain.columns)
         res = []
         for individual_sample in tqdm(x_explain.iterrows()):

@@ -2,7 +2,7 @@
 Module that provides the LogRegExplainer class base on the BaseExplainer class
 """
 import operator
-from typing import Optional, List, Dict
+from typing import Optional, List, Dict, Union
 
 import pandas as pd
 import numpy as np
@@ -28,16 +28,20 @@ class LogRegExplainer(BaseExplainer):
         self._model_to_explain = None
         self._feature_names = None
 
-    def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame):
+    def fit(self, model: sklearn.base.BaseEstimator, x_train: Union[pd.Series, pd.DataFrame, np.ndarray],
+            y_train: pd.DataFrame):
+        x_train = self._get_dataframe_from_mixed_input(x_train)
         self._model_to_explain = model
         self._feature_names = x_train.columns
 
-    def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> Dict[str, float]:
+    def feature_importance(self, x_explain: Union[pd.Series, pd.DataFrame, np.ndarray],
+                           n_cols: Optional[int] = None) -> Dict[str, float]:
         """
         returns the absolute value (i.e. magnitude) of the coefficient of each feature as a dict.
         :param x_explain: the dataset to explain on
         :param n_cols: the maximum number of features to return
         """
+        x_explain = self._get_dataframe_from_mixed_input(x_explain)
         res = dict(zip(x_explain.columns, np.abs(self._model_to_explain.coef_[0])))
         return res
 
@@ -70,7 +74,8 @@ class LogRegExplainer(BaseExplainer):
         )
         return fig
 
-    def explain_local(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> List[Dict[str, float]]:
+    def explain_local(self, x_explain: Union[pd.Series, pd.DataFrame, np.ndarray],
+                      n_cols: Optional[int] = None) -> List[Dict[str, float]]:
         """
         returns local relative importance of features for a specific observation.
         :param x_explain: the dataset to explain on

@@ -3,9 +3,10 @@ module that provides the base explainer class from which all future explainers w
 """
 import abc
 import operator
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Union
 
 import sklearn
+import numpy as np
 import pandas as pd
 import plotly.graph_objs as go
 from trelawney.colors import BLUE, GREY
@@ -25,7 +26,8 @@ class BaseExplainer(abc.ABC):
     def __init__(self):
         self._model_to_explain = None
 
-    def fit(self, model: sklearn.base.BaseEstimator, x_train: pd.DataFrame, y_train: pd.DataFrame):
+    def fit(self, model: sklearn.base.BaseEstimator, x_train: Union[pd.Series, pd.DataFrame, np.ndarray],
+            y_train: pd.DataFrame):
         """
         prepares the explainer by saving all the information it needs and fitting necessary models
 
@@ -36,7 +38,8 @@ class BaseExplainer(abc.ABC):
         self._model_to_explain = model
 
     @abc.abstractmethod
-    def feature_importance(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> Dict[str, float]:
+    def feature_importance(self, x_explain: Union[pd.Series, pd.DataFrame, np.ndarray],
+                           n_cols: Optional[int] = None) -> Dict[str, float]:
         """
         returns a relative importance of each feature on the predictions of the model (the explainer was fitted on) for
         `x_explain` globally. The output will be a dict with the importance for each column/feature in `x_explain`
@@ -84,18 +87,36 @@ class BaseExplainer(abc.ABC):
                       marker_color=colors)
         return go.Figure(plot)
 
+    @staticmethod
+    def _get_dataframe_from_mixed_input(undecided_input):
+        """transforms several accepted formats (for now DataFrames, Series and arrays) to data-frames"""
+        if isinstance(undecided_input, pd.DataFrame):
+            return undecided_input
+        if isinstance(undecided_input, pd.Series):
+            return pd.DataFrame(undecided_input).T
+        if isinstance(undecided_input, np.ndarray) and len(undecided_input.shape) == 1:
+            return pd.DataFrame(undecided_input.reshape(1, -1), columns=['feature_{}'.format(i)
+                                                                         for i in range(undecided_input.shape[0])])
+        if isinstance(undecided_input, np.ndarray) and len(undecided_input.shape) == 2:
+            return pd.DataFrame(undecided_input, columns=['feature_{}'.format(i)
+                                                          for i in range(undecided_input.shape[1])])
+        if isinstance(undecided_input, np.ndarray):
+            raise ValueError('arrays with more than two dimensions not supported')
+        raise TypeError('unsupported type: {}'.format(type(undecided_input)))
+
     @abc.abstractmethod
-    def explain_local(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> List[Dict[str, float]]:
+    def explain_local(self, x_explain: Union[pd.Series, pd.DataFrame, np.ndarray],
+                      n_cols: Optional[int] = None) -> List[Dict[str, float]]:
         """
         explains each individual predictions made on x_explain. BEWARE this is usually quite slow on large datasets
 
         :param x_explain: the samples to explain
         :param n_cols: the number of columns to limit the explanation to
         """
-        if not isinstance(x_explain, pd.DataFrame):
-            raise TypeError('{} is not supported, please use dataframes'.format(type(x_explain)))
+        if not isinstance(x_explain, (pd.DataFrame, pd.Series, np.ndarray)):
+            raise TypeError('{} is not supported, please use dataframes, Series or arrays'.format(type(x_explain)))
 
-    def explain_filtered_local(self, x_explain: pd.DataFrame, cols: List[str],
+    def explain_filtered_local(self, x_explain: Union[pd.Series, pd.DataFrame, np.ndarray], cols: List[str],
                                n_cols: Optional[int] = None) -> List[Dict[str, float]]:
         """same as `explain_local` but applying a filter on each explanation on the features"""
 
@@ -104,8 +125,9 @@ class BaseExplainer(abc.ABC):
             for sample_importance_dict in self.explain_local(x_explain)
         ]
 
-    def graph_local_explanation(self, x_explain: pd.DataFrame, cols: Optional[List[str]] = None,
-                                n_cols: Optional[int] = None) -> go.Figure:
+    def graph_local_explanation(self, x_explain: Union[pd.Series, pd.DataFrame, np.ndarray],
+                                cols: Optional[List[str]] = None, n_cols: Optional[int] = None,
+                                info_values: Optional[Union[pd.DataFrame, pd.Series]] = None) -> go.Figure:
         """
         creates a waterfall plotly figure to represent the influance of each feature on the final decision for a single
         prediction of the model.
@@ -122,6 +144,22 @@ class BaseExplainer(abc.ABC):
         """
         if x_explain.shape[0] != 1:
             raise ValueError('can only explain single observations, if you only have one sample, use reshape(1, -1)')
+
+        info_values = x_explain if info_values is None else info_values
+
+        info_values = self._get_dataframe_from_mixed_input(info_values)
+        x_explain = self._get_dataframe_from_mixed_input(x_explain)
+        # transforming the info values to a Series
+        info_values = info_values.iloc[0, :]
+        print(info_values)
+        print(x_explain)
+
+        # checking info columns and x_explain match
+        if any(info_values.index != x_explain.columns):
+            raise ValueError(
+                'columns differ from x_explain ({}) and info_values({})'.format(x_explain.columns, info_values.index)
+            )
+
         cols = cols or x_explain.columns.to_list()
         importance_dict = self.explain_filtered_local(x_explain, cols=cols, n_cols=n_cols)[0]
 
@@ -131,7 +169,7 @@ class BaseExplainer(abc.ABC):
 
         sorted_importances = sorted(importance_dict.items(), key=lambda importance: abs(importance[1]), reverse=True)
         hovertext = ['base_value,',
-                     *['{} = {}'.format(col_name, col_value) for col_name, col_value in sorted_importances],
+                     *['{} = {}'.format(col_name, info_values[col_name]) for col_name, col_value in sorted_importances],
                      'rest', 'output_value = {}'.format(output_value)]
         fig = go.Figure(go.Waterfall(
             orientation="v",
