@@ -130,6 +130,9 @@ class BaseExplainer(abc.ABC):
         rest = importance_dict.pop('rest')
 
         sorted_importances = sorted(importance_dict.items(), key=lambda importance: abs(importance[1]), reverse=True)
+        hovertext = ['base_value,',
+                     *['{} = {}'.format(col_name, col_value) for col_name, col_value in sorted_importances],
+                     'rest', 'output_value = {}'.format(output_value)]
         fig = go.Figure(go.Waterfall(
             orientation="v",
             measure=['absolute', *['relative' for _ in importance_dict], 'relative', 'absolute'],
@@ -141,6 +144,8 @@ class BaseExplainer(abc.ABC):
             decreasing={"marker": {"color": '#DB643D'}},
             increasing={"marker": {"color": '#3DDC97'}},
             totals={"marker": {"color": BLUE}},
+            hovertext=hovertext,
+            hoverinfo='text+delta',
         ))
         fig.update_layout(
             title="explanation",
