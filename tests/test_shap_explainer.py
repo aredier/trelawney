@@ -6,14 +6,14 @@ from trelawney.shap_explainer import ShapExplainer
 
 
 def _do_explainer_test(explainer):
-    explanation = explainer.explain_local(pd.DataFrame([[5, 0.1], [95, -0.5]], columns=['real', 'fake']))
+    data = pd.DataFrame([[5, 0.1], [95, -0.5]], columns=['real', 'fake'])
+    explanation = explainer.explain_local(data)
     assert len(explanation) == 2
-    for single_explanation in explanation:
+    for single_explanation, data_row in zip(explanation, data.iterrows()):
         assert abs(single_explanation['real']) > abs(single_explanation['fake'])
 
-        # we need positive values as this feature is globally positivly corelated with the target and SHAP claims
-        # global consistency of it's explanations
-        # assert single_explanation['real'] > 0
+        # we need the values to be positive when the output is positive and negative when the output is negative
+        assert (single_explanation['real'] > 0) == (data_row[1]['real'] > 50)
 
 
 def test_shap_explainer_single(fake_dataset, fitted_logistic_regression):

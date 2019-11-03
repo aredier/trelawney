@@ -45,10 +45,10 @@ class ShapExplainer(BaseExplainer):
 
     def _get_shap_values(self, x_explain):
         shap_values = self._explainer.shap_values(x_explain.values)
-        if isinstance(self._model_to_explain, KerasClassifier):
-            # for nn, shap creates a list of shap values for every input layer in the NN,
-            # we assume one input layer
-            return shap_values[0]
+        if isinstance(shap_values, list):
+            # if we have a list this means there is one output per class, we take the positive class
+            # TODO class should be a parameter
+            return shap_values[1]
         return shap_values
 
     def explain_local(self, x_explain: pd.DataFrame, n_cols: Optional[int] = None) -> List[Dict[str, float]]:
