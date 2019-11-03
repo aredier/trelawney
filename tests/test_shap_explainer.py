@@ -8,11 +8,12 @@ from trelawney.shap_explainer import ShapExplainer
 
 def _do_explainer_test(explainer, data_to_test=None, col_real='real', col_fake='fake'):
     data_to_test = data_to_test if data_to_test is not None else pd.DataFrame([[5, 0.1], [95, -0.5]], columns=[col_real, col_fake])
+    data_to_test = ShapExplainer._get_dataframe_from_mixed_input(data_to_test)
     explanation = explainer.explain_local(data_to_test)
     assert len(explanation) == data_to_test.shape[0] if len(data_to_test.shape) == 2 else 1
-    for single_explanation, data_row in zip(explanation, data.iterrows()):
+    for single_explanation, data_row in zip(explanation, data_to_test.iterrows()):
         assert abs(single_explanation[col_real]) > abs(single_explanation[col_fake])
-        assert (single_explanation[col_real] > 0) == (data_row[1]['real'] > 50)
+        assert (single_explanation[col_real] > 0) == (data_row[1][col_real] > 50)
 
 
 def test_shap_explainer_single(fake_dataset, fitted_logistic_regression):
