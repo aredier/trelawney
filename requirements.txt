@@ -8,5 +8,5 @@ xgboost==0.90
 Keras==2.3.0
 tensorflow==1.14.0
 
-shap==0.30.2
+shap==0.33.0
 lime==0.1.1.36
