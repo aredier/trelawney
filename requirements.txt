@@ -6,7 +6,6 @@ plotly==4.1.1
 scikit-learn==0.21.3
 xgboost==0.90
 Keras==2.3.0
-tensorflow==1.15.2
 
 shap==0.30.2
 lime==0.1.1.36

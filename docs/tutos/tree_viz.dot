@@ -1,0 +1,33 @@
+digraph Tree {
+node [shape=box, style="filled, rounded", color="black", fontname=helvetica] ;
+edge [fontname=helvetica] ;
+0 [label=<Sex &le; -0.331<br/>gini = 0.434<br/>samples = 668<br/>value = [455, 213]>, fillcolor="#f1bc96"] ;
+1 [label=<Family_Size &le; 1.521<br/>gini = 0.259<br/>samples = 229<br/>value = [35, 194]>, fillcolor="#5dafea"] ;
+0 -> 1 [labeldistance=2.5, labelangle=45, headlabel="True"] ;
+2 [label=<Pclass &le; 0.202<br/>gini = 0.144<br/>samples = 205<br/>value = [16, 189]>, fillcolor="#4aa5e7"] ;
+1 -> 2 ;
+3 [label=<gini = 0.0<br/>samples = 115<br/>value = [0, 115]>, fillcolor="#399de5"] ;
+2 -> 3 ;
+4 [label=<gini = 0.292<br/>samples = 90<br/>value = [16, 74]>, fillcolor="#64b2eb"] ;
+2 -> 4 ;
+5 [label=<Pclass &le; 0.202<br/>gini = 0.33<br/>samples = 24<br/>value = [19, 5]>, fillcolor="#eca26d"] ;
+1 -> 5 ;
+6 [label=<gini = 0.0<br/>samples = 5<br/>value = [0, 5]>, fillcolor="#399de5"] ;
+5 -> 6 ;
+7 [label=<gini = 0.0<br/>samples = 19<br/>value = [19, 0]>, fillcolor="#e58139"] ;
+5 -> 7 ;
+8 [label=<Age &le; -1.74<br/>gini = 0.083<br/>samples = 439<br/>value = [420, 19]>, fillcolor="#e68742"] ;
+0 -> 8 [labeldistance=2.5, labelangle=-45, headlabel="False"] ;
+9 [label=<SibSp &le; 2.065<br/>gini = 0.444<br/>samples = 21<br/>value = [7, 14]>, fillcolor="#9ccef2"] ;
+8 -> 9 ;
+10 [label=<gini = 0.0<br/>samples = 14<br/>value = [0, 14]>, fillcolor="#399de5"] ;
+9 -> 10 ;
+11 [label=<gini = 0.0<br/>samples = 7<br/>value = [7, 0]>, fillcolor="#e58139"] ;
+9 -> 11 ;
+12 [label=<Deck &le; 1.262<br/>gini = 0.024<br/>samples = 418<br/>value = [413, 5]>, fillcolor="#e5833b"] ;
+8 -> 12 ;
+13 [label=<gini = 0.01<br/>samples = 389<br/>value = [387, 2]>, fillcolor="#e5823a"] ;
+12 -> 13 ;
+14 [label=<gini = 0.185<br/>samples = 29<br/>value = [26, 3]>, fillcolor="#e89050"] ;
+12 -> 14 ;
+}
