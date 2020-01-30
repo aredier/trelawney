@@ -6,8 +6,8 @@ trelawney
 .. image:: https://img.shields.io/pypi/v/trelawney.svg
         :target: https://pypi.python.org/pypi/trelawney
 
-.. image:: https://img.shields.io/travis/skanderkam/trelawney.svg
-        :target: https://travis-ci.org/skanderkam/trelawney
+.. image:: https://img.shields.io/travis/aredier/trelawney.svg
+        :target: https://travis-ci.org/aredier/trelawney
 
 .. image:: https://readthedocs.org/projects/trelawney/badge/?version=latest
         :target: https://trelawney.readthedocs.io/en/latest/?badge=latest
