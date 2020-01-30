@@ -15,6 +15,9 @@ with open('HISTORY.rst') as history_file:
 with open('requirements.txt') as requirements_file:
     requirements = list(requirements_file.readlines())
 
+    # problenm with tox
+    requirements.append('tensorflow==1.15.2')
+
 setup_requirements = ['pytest-runner', ]
 
 test_requirements = ['pytest>=3', ]
