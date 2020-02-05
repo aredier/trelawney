@@ -151,8 +151,6 @@ class BaseExplainer(abc.ABC):
         x_explain = self._get_dataframe_from_mixed_input(x_explain)
         # transforming the info values to a Series
         info_values = info_values.iloc[0, :]
-        print(info_values)
-        print(x_explain)
 
         # checking info columns and x_explain match
         if any(info_values.index != x_explain.columns):
