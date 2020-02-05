@@ -7,13 +7,3 @@ install:
     - pip install -U tox-travis
     - pip install tox-pip-version
 script: tox
-deploy:
-  provider: pypi
-  distributions: sdist bdist_wheel
-  user: skanderkam
-  password:
-    secure: oWUayCo8BXA9sJ7UDvTKY8FA5S4TNNJEdwNoSgwculEueSMQhlHImqrDBJQh6QOV94SnEeMgx7atXEDzn8DCDhAFSBD5EFkHm7m0zwyXw4YEZJ8wXn3Kl+mSv1FnWocmKflJfUxCq1+vP46Jc6FTf8tR/2S5mauKncrFC0+0Ak2HM4NcXlqgU+e0gRljzpivEJWeyb+xpT2nWCehNS8BSQHRjUshUz+493mNRO3Knnyxq3kEtd865VYZeX/DnUpiJ0opKkJYLmwuNMNCTznDpLoucXS77xeuQ8iyfaCiCcHoPn6/dniYn1tl9CFjGqMnyOPCywHrgf5JppBzw402mLa1X/aLADgOKofVezI6xWsyPKCXIimYY/3MYcELLzF8jnp30jCB8VLBJGbvXjmHgZWfTFwRm4AFtV+kmjTOkjYOVi4MmWC+B85Klj6u5FQ+H6aR/FqiD3SO+ymv/4gCjAeWZYafH3dpF9GMPpLUhqOWiqrDvDxddDdTc4hPNFBCSTMa8n5KwQNjKd7RJ3DL7+e6el9Sy2gwn6NvnfhWZA0TRBs/9BZ2rEj6ymwzJ/hVcDP7T1Mm18VXSwbvFyMZwHXZaqH44M0BGprBItH2bHAEsW+6U0puN/8arfNyJWGo+ZakGbp1fHOU0VY0TYgqJkvaXHRcRpPr6D55tMGSwfI=
-  on:
-    tags: true
-    repo: aredier/trelawney
-    python: 3.7
