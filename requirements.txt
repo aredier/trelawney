@@ -4,7 +4,7 @@ tqdm==4.36.1
 plotly==4.1.1
 
 scikit-learn==0.21.3
-xgboost==0.90
+xgboost==1.0.0
 Keras==2.3.0
 
 shap==0.30.2
