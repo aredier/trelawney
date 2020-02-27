@@ -77,12 +77,34 @@ Here is an example of how to use a Trelawney explainer
 FAQ
 ---
 
-   Why should I use Trelawney rather than Lime_ and SHAP_
+Why should I use Trelawney rather than Lime_ and SHAP_
+******************************************************
 
 while you can definitally use the Lime and SHAP packages directly (they will give you more control over how to use their
 packages), they are very specialized packages with different APIs, graphs and vocabulary. Trelawnaey offers you a
 unified API, representation and vocabulary for all state of the art explanation methods so that you don't lose time
 adapting to each new method but just change a class and Trelawney will adapt to you.
+
+How to create implement my own interpretation method in the Trelawney framework?
+********************************************************************************
+
+To implement your own  explainer you will need to inherit from the `BaseExplainer` class and overide it's three
+abstract methods as such:
+
+>>> class MyOwnInterpreter(BaseExplainer):
+...     def fit(self, model: sklearn.base.BaseEstimator, x_train: Union[pd.Series, pd.DataFrame, np.ndarray],
+...             y_train: pd.DataFrame):
+...             # fit your interpreter with some training data if needed
+...             pass
+...    def explain_local(self, x_explain: Union[pd.Series, pd.DataFrame, np.ndarray],
+...                      n_cols: Optional[int] = None) -> List[Dict[str, float]]:
+...             # interpret a single prediction of the model
+...             pass
+...     def feature_importance(self, x_explain: Union[pd.Series, pd.DataFrame, np.ndarray],
+...                            n_cols: Optional[int] = None) -> Dict[str, float]:
+...             # interpret the global importance of all at most n_cols features on the predictions on x_explain
+...             pass
+
 
 Comming Soon
 ------------
