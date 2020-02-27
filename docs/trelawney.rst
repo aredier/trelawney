@@ -60,14 +60,6 @@ trelawney.tree\_explainer module
     :undoc-members:
     :show-inheritance:
 
-trelawney.trelawney module
---------------------------
-
-.. automodule:: trelawney.trelawney
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------
