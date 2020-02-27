@@ -69,7 +69,7 @@ Here is an example of how to use a Trelawney explainer
 {'var_1': 0.5, 'var_2': 0.2, ...} ,
 >>> explanation =  explainer.graph_feature_importance(X_expain)
 
-
+R
 .. image:: http://drive.google.com/uc?export=view&id=1R2NFEU0bcZYpeiFsLZDKYfPkjHz-cHJ_
    :width: 400
    :alt: Local Explanation Graph
@@ -104,6 +104,9 @@ abstract methods as such:
 ...                            n_cols: Optional[int] = None) -> Dict[str, float]:
 ...             # interpret the global importance of all at most n_cols features on the predictions on x_explain
 ...             pass
+
+You can find some more information by reading the documentation of the `BaseExplainer` class. If possible don't
+hesitate to contribute to trelawney and create a PR.
 
 
 Comming Soon
